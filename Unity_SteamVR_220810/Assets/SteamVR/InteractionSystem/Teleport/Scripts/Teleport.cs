@@ -13,6 +13,10 @@ namespace Valve.VR.InteractionSystem
 	//-------------------------------------------------------------------------
 	public class Teleport : MonoBehaviour
     {
+		[SerializeField, Header("是否顯示教學")]
+		private bool showTutorial;
+
+        #region Steam VR資料
         public SteamVR_Action_Boolean teleportAction = SteamVR_Input.GetAction<SteamVR_Action_Boolean>("Teleport");
 
         public LayerMask traceLayerMask;
@@ -138,9 +142,10 @@ namespace Valve.VR.InteractionSystem
 			}
 		}
 
+#endregion
 
-		//-------------------------------------------------
-		void Awake()
+        //-------------------------------------------------
+        void Awake()
         {
             _instance = this;
 
@@ -169,6 +174,7 @@ namespace Valve.VR.InteractionSystem
 			invalidReticleMaxScale *= invalidReticleStartingScale;
 		}
 
+		private GameObject goBasketballCenter;
 
 		//-------------------------------------------------
 		void Start()
@@ -188,12 +194,14 @@ namespace Valve.VR.InteractionSystem
 
 			CheckForSpawnPoint();
 
-			Invoke( "ShowTeleportHint", 5.0f );
+			if (showTutorial) Invoke( "ShowTeleportHint", 5.0f );
+			goBasketballCenter = GameObject.Find("籃球框中心");
 		}
 
+        #region Steam VR 程式區塊
 
-		//-------------------------------------------------
-		void OnEnable()
+        //-------------------------------------------------
+        void OnEnable()
 		{
 			chaperoneInfoInitializedAction.enabled = true;
 			OnChaperoneInfoInitialized(); // In case it's already initialized
@@ -851,10 +859,10 @@ namespace Valve.VR.InteractionSystem
 
 			Invoke( "TeleportPlayer", currentFadeTime );
 		}
+        #endregion
 
-
-		//-------------------------------------------------
-		private void TeleportPlayer()
+        //-------------------------------------------------
+        private void TeleportPlayer()
 		{
 			teleporting = false;
 
@@ -867,6 +875,8 @@ namespace Valve.VR.InteractionSystem
 
 			if ( teleportPoint != null )
 			{
+				goBasketballCenter.SendMessage("ChangeScore", 2);
+
 				teleportPosition = teleportPoint.transform.position;
 
 				//Teleport to a new scene
@@ -881,6 +891,8 @@ namespace Valve.VR.InteractionSystem
 			TeleportArea teleportArea = teleportingToMarker as TeleportArea;
 			if ( teleportArea != null )
 			{
+				goBasketballCenter.SendMessage("ChangeScore", 3);
+
 				if ( floorFixupMaximumTraceDistance > 0.0f )
 				{
 					RaycastHit raycastHit;
